@@ -107,6 +107,8 @@
     <Compile Include="Models\Address.cs" />
     <Compile Include="Models\Color.cs" />
     <Compile Include="Models\Customer.cs" />
+    <Compile Include="Models\CustomerOrderContext.cs" />
+    <Compile Include="Models\DataSource.cs" />
     <Compile Include="Models\Order.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
