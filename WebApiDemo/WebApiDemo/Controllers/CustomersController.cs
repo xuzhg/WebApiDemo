@@ -20,7 +20,13 @@ namespace WebApiDemo.Controllers
         [EnableQuery]
         public IHttpActionResult Get(int key)
         {
-            return Ok(DataSource.Customers.FirstOrDefault(c => c.Id == key));
+            Customer customer = DataSource.Customers.FirstOrDefault(c => c.Id == key);
+            if (customer == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(customer);
         }
     }
 }

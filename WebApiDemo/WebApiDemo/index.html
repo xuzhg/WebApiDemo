@@ -1,0 +1,116 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Customer-Order Scenario</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 5px;
+        }
+
+    </style>
+</head>
+<body>
+    <div>
+        <h2>All Customers</h2>
+        <p id="contexturi"></p>
+        <ol id="customers"></ol>
+    </div>
+    <div>
+        <table id="customerTbl" style="width:100%">
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Color</th>
+                <th>City</th>
+                <th>Street</th>
+                <th>Orders Count</th>
+            </tr>
+        </table>
+    </div>
+    <div>
+        <h2>Search Customer by ID </h2>
+        <label>Customer ID :</label><input type="text" id="customerID" size="5"></input>
+        <input type="button" value="Search" onclick=" QueryCustomer(); "/>
+        <p id="customerOrder"/>
+        <table id="orderTbl" style="width: 50%">
+            <tr>
+                <th>ID</th>
+                <th>Price</th>
+            </tr>
+        </table>
+    </div>
+
+<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.3.min.js"></script>
+
+    <script>
+    var uri = 'odata/Customers?$expand=Orders';
+    // var uri = 'odata/Customers';
+
+    $(document).ready(function () {
+
+        $("#orderTbl").hide();
+
+        $.getJSON(uri)
+            .done(function (data) {
+                $('#contexturi').text("@odata.context:" + data["@odata.context"]);
+                $.each(data["value"], function (key, item) {
+
+                    var id = '<td>' + item.Id + '</td>';
+                    var name = '<td>' + item.Name + '</td>';
+                    var color = '<td>' + item.FavoriteColor + '</td>';
+                    var city = '<td>' + item.Address.City + '</td>';
+                    var street = '<td>' + item.Address.Street + '</td>';
+                    var orders = '<td></td>';
+
+                    $.each(item, function (subkey, subItem) {
+                        if (subkey == 'Orders') {
+                            if (subItem != undefined && subItem.length != undefined) {
+                                orders = '<td>' + subItem.length + '</td>';
+                            }
+                        }
+                    });
+
+                    var row = '<tr>' + id + name + color + city + street + orders + '</tr>';
+                    $("#customerTbl").append(row);
+                });
+            });
+    });
+
+    function QueryCustomer() {
+        var id = $('#customerID').val();
+        var requestUri = 'odata/Customers(' + id + ')?$expand=Orders';
+
+        $.getJSON(requestUri)
+            .done(function (data) {
+                $('#customerOrder').text(formatItem(data));
+                
+            })
+          .fail(function (jqXHR, textStatus, err) {
+              $('#customerOrder').text('Error: ' + err);
+              $("#orderTbl").hide();
+            });
+    }
+
+    function formatItem(customer) {
+        $("#orderTbl").show();
+        $("#orderTbl").empty();
+
+        $("#orderTbl").append('<tr><th>ID</th><th>Price</th></tr>' );
+        $.each(customer.Orders, function (subkey, subItem) {
+            var id = '<td>' + 'Order #' + subItem.Id + '</td>';
+            var price = '<td>' + '$' + subItem.Price + '</td>';
+            var row = '<tr>' + id + price + '</tr>';
+            $("#orderTbl").append(row);
+        });
+
+        return customer.Name + ' likes [ ' + customer.FavoriteColor + ' ], lives at [ ' + customer.Address.Street + ' ] street in [ ' + customer.Address.City + " ] city . He has the following {Orders}: ";
+    }
+
+    </script>
+</body>
+</html>
